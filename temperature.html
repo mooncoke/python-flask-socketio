@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>NIC BBFV Test</title>
+    <style>
+        #uploadInfo{width:400px; height:400px; overflow:auto; border:2px solid #000000;color:#000000;}
+    </style>
+    <style>
+        #emit_data111{width:400px; height:400px; overflow:auto; border:2px solid #000000;color:#000000;}
+    </style>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            namespace = '/test'; // change to an empty string to use the global namespace
+            // the socket.io documentation recommends sending an explicit package upon connection
+            // this is specially important when using the global namespace
+            var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            // event handler for server sent data
+            // the data is displayed in the "Received" section of the page
+            socket.on('my response', function(msg) {
+                $('#log').append('<br>Received #' + msg.count + ': ' + msg.data);
+                $('#uploadInfo').append('<li>Info From the Client:Websocket connect successful </li>');
+            });
+            // event handler for new connections
+            socket.on('connect', function() {
+                socket.emit('my event', {data: 'I\'m connected!'});
+                socket.emit('my myjson', {"Cardname":"QLogic","Marketing Name":"QLogic London 16G FC adapter","Part Number":111111,"SN":222});
+            });
+
+            socket.on('my uploadInfo', function(msg) {
+                $('#msg').prepend('<li>' + msg.data + '</li>');
+                $('#uploadInfo').prepend('<li>' + msg.count + ': '+ msg.data + '</li>');
+            });
+
+            socket.on('my temperature', function(msg) {
+                $( "#temperature1" ).text( msg.data1);
+                $( "#temperature2" ).text( msg.data2);
+                $( "#temperature3" ).text( msg.data3);
+                $( "#temperature4" ).text( msg.data4);
+                $( "#temperature5" ).text( msg.data5);
+                $( "#temperature6" ).text( msg.data6);
+                $( "#temperature7" ).text( msg.data7);
+                $( "#temperature8" ).text( msg.data8);
+
+            });
+
+
+            // handlers for the different forms in the page
+            // these send data to the server in a variety of ways
+            $('form#emit').submit(function(event) {
+                socket.emit('my event', {data: $('#emit_data').val()});
+                return false;
+            });
+            $('form#broadcast').submit(function(event) {
+                socket.emit('my broadcast event', {data: $('#broadcast_data').val()});
+                return false;
+            });
+            $('form#join').submit(function(event) {
+                socket.emit('join', {room: $('#join_room').val()});
+                return false;
+            });
+            $('form#leave').submit(function(event) {
+                socket.emit('leave', {room: $('#leave_room').val()});
+                return false;
+            });
+            $('form#send_room').submit(function(event) {
+                socket.emit('my room event', {room: $('#room_name').val(), data: $('#room_data').val()});
+                return false;
+            });
+            $('form#close').submit(function(event) {
+                socket.emit('close room', {room: $('#close_room').val()});
+                return false;
+            });
+            $('form#disconnect').submit(function(event) {
+                socket.emit('disconnect request');
+                return false;
+            });
+        });
+    </script>
+</head>
+
+
+<body>
+    <p>*** Hello ,Enjoy The Python Flask SocketIO World ***</p>
+    <h1>Flask-NIC BBFV Test</h1>
+    <p>Temperature 1: <span id="temperature1"></span></p> 
+    <p>Temperature 2: <span id="temperature2"></span></p> 
+    <p>Temperature 3: <span id="temperature3"></span></p> 
+    <p>Temperature 4: <span id="temperature4"></span></p> 
+    <p>Temperature 5: <span id="temperature5"></span></p> 
+    <p>Temperature 6: <span id="temperature6"></span></p> 
+    <p>Temperature 7: <span id="temperature7"></span></p> 
+    <p>Temperature 8: <span id="temperature8"></span></p> 
+    <h1>Flask-SocketIO Test</h1>
+
+    <h2>QLogic adapter inventory information for Redfish</h2>
+    <form id="emit" method="POST" action='#'>
+        <p>Hello: 
+            <input type="text" name="emit_data" id="emit_data" placeholder="Message">
+            <input type="submit" value="Echo">
+        </p> 
+    </form>
+    <form id="broadcast" method="POST" action='#'>
+        <p>Hello:
+            <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
+            <input type="submit" value="Broadcast">
+        </p> 
+    </form>
+    <form id="join" method="POST" action='#'>
+        <p>Hello: 
+            <input type="text" name="join_room" id="join_room" placeholder="Room Name">
+            <input type="submit" value="Join Room">
+        </p>        
+    </form>
+    <form id="leave" method="POST" action='#'>
+        <p>Hello:
+            <input type="text" name="leave_room" id="leave_room" placeholder="Room Name">
+            <input type="submit" value="Leave Room">
+        </p> 
+    </form>
+    <form id="send_room" method="POST" action='#'>
+        <p>Hello:
+            <input type="text" name="room_name" id="room_name" placeholder="Room Name">
+            <input type="text" name="room_data" id="room_data" placeholder="Message">
+            <input type="submit" value="Send to Room">
+        </p> 
+    </form>
+    <form id="close" method="POST" action="#">
+        <p>Hello:
+            <input type="text" name="close_room" id="close_room" placeholder="Room Name">
+            <input type="submit" value="Close Room">
+        </p> 
+    </form>
+    <form id="disconnect" method="POST" action="#">
+        <p>Hello:
+            <input type="submit" value="Disconnect">
+        </p> 
+    </form>
+
+    <p> Real-time Message-box </p>
+    <div id="uploadInfo"></div>
+    <p> --- Test ---- </p>
+    <div id="emit_data111"></div>
+    <h2>Receive:</h2>
+    <div id="log"></div>
+</body>
+</html>
